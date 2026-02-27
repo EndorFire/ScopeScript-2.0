@@ -13,15 +13,10 @@ end
 global stageCoordinates;
 fcScopeCurrent = scopeParams('saveStage');
 
-parsed = regexp(properties(fcScopeCurrent),'timePoints[0-9]+','match');
-parsed = removeEmptyCells(parsed);
+
 numel(stageCoordinates)
-if ~isempty(parsed)
-    for i = 1:numel(parsed)
-       currTimePoints = getfield(fcScopeCurrent,parsed{i}{1});
-       offsetTimePoints = currTimePoints+numel(stageCoordinates)*timeOffset;
-       setfield(fcScopeCurrent,parsed{i}{1},offsetTimePoints);
-    end
+for i = 1:numel(fcScopeCurrent.recipeList)
+    fcScopeCurrent.recipeList{i}.timePoints = fcScopeCurrent.recipeList{i}.timePoints + numel(stageCoordinates)*timeOffset;
 end
 
 
