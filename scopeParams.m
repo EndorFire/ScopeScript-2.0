@@ -41,104 +41,14 @@ classdef scopeParams < matlab.mixin.SetGet & handle
         % Both zstacks are taken with exposure[7]
 
         %%%%%
+        recipelist = []; 
+        combinedTimePoints = [];
 
-
-        setChannel1 = {{'BF', 10}};
-        function1    = {'takeA3DStack',{'zStack2','BrightFieldTTL'},''};
-        timePoints1  = 0:60:60*60*3; % start immediately, call function[1] every 10 sec for 60 sec total
-        exposure1 = 200;
-
-        
-        % fcScope[2] takes only 1 zstack in the PL channel "laser-640"
-        setChannel2  = {{'laser-640',1}};
-        function2    = {'takeA3DStack',{'zStack2','Laser640TTL'},''};
-        timePoints2  = 0:60:60*60*3;
-        exposure2    = 20;
-        
-        setChannel3  = {{'laser-561',1}};
-        function3    = {'takeA3DStack',{'zStack2','Laser561TTL'},''};
-        timePoints3  = 0:60:60*60*3;
-        exposure3    = 20;
-        
-        setChannel4  = {{'laser-488',1}};
-        function4    = {'takeA3DStack',{'zStack2','Laser488TTL'},''};
-        timePoints4  = 0:15:60*60*4;
-        exposure4    = 10;
-        
-               
-        setChannel5  = {{'led-340',1}};
-        function5    = {'takeA3DStack',{'zStackZeroStep','UVTTL'},''};
-        timePoints5  = 0:15:60*60*3;
-        exposure5    = 10;
-        
-        setChannel6  = {{'laser-561-640',{0,1}},{'laser-561-640',{1,0}}};
-        function6    = {'takeA3DStack',{'zStack1','Laser561&640','zStack2','Laser561&640'},''};
-        timePoints6  = 0:10:60;
-        exposure6    = 10;
-        
-
-        setChannel7  = {{'laser-640',1},{'BF',1}};
-        function7    = {'takeA3DStack',{'zStack1','Laser640TTL','zStack2','BrightFieldTTL'},''};
-        timePoints7  = 0:60:60*60;
-        exposure7    = 10;
-        
-        setChannel8  = {{'laser-561',1},{'BF',100}};
-        function8    = {'takeA3DStack',{'zStack1','Laser561TTL','zStack2','BrightFieldTTL'},''};
-        timePoints8  = 0:10:60;
-        exposure8    = 10;
-        
-        setChannel9  = {{'laser-488',1},{'BF',100}};
-        function9    = {'takeA3DStack',{'zStack1','Laser488TTL','zStack2','BrightFieldTTL'},''};
-        timePoints9  = 0:10:60;
-        exposure9    = 10;
-        
-        
-        %fcScope[11] takes 2D stack with 2 PL channels triggered
-        %simultaneously for Optosplit
-        setChannel11  = {{'6-TRF561-640',{6,2}}};
-        function11    = {'takeA3DStack',{'zStackZeroStep1','AllFourTTL'},''};
-        timePoints11  = 0:5:60*60;
-        exposure11    = 50;
         
         %-zStack recipes---------------------------------------------------
         % z step is defined in DAC units, not nanometers
         % 1 DAC unit = 220 um[max stage range]/65536 ~= 3 nm
-        zStack1_N   = 100; % number of slices
-        zStack1_dz  = 75; % size of a piezo step; stage goes up
-        zStack1_z0  = 0;  % starting plane
         
-        zStack2_N   = 100;
-        zStack2_dz  = -75; % stage goes down
-        zStack2_z0  = 100*75;
-        
-        zStack3_N   = 15;
-        zStack3_dz  = -300;
-        zStack3_z0  = 4*300;
-        
-        zStack4_N   = 1;
-        zStack4_dz  = 0;
-        zStack4_z0  = 0;
-        
-        zStack5_N   = 11;
-        zStack5_dz  = 400;
-        zStack5_z0  = 0;
-        
-        zStack6_N   = 11;
-        zStack6_dz  = -400;
-        zStack6_z0  = 8*400;
-        
-        zStack8_N   = 180; 
-        zStack8_dz  = -7;
-        zStack8_z0  = 0;
-        
-        zStackZeroStep_N   = 50; %for 2D timeLapses
-        zStackZeroStep_dz  = 0;
-        zStackZeroStep_z0  = 0;
-        
-        zStackZeroStep1_N   = 1; %for 2D timeLapses
-        zStackZeroStep1_dz  = 0;
-        zStackZeroStep1_z0  = 0;
-
         %-zStack feed forward recipes--------------------------------------
         % these parameters define additional stage acceleration
         % acceleration obtained by sending triangle pulses defined by additional voltage ff1_deltaUp and ff1_deltaDown
@@ -247,7 +157,7 @@ classdef scopeParams < matlab.mixin.SetGet & handle
         %-TIF SAVING PARAMS------------------------------------------------
         saveParams              = {'tif', 'Compression', 'none'};
     end
-    
+
     methods
         function obj = scopeParams(varargin)
             % fcScope = scopeParams('saveStage') then this will save the stage position
@@ -260,6 +170,23 @@ classdef scopeParams < matlab.mixin.SetGet & handle
             obj.currentDate = returnDate();
             obj.pfsOffset   = getPFSOffset();
             obj.currentDateTime = datetime('now');
+
+            recipe1 = recipe();
+            recipe1.setChannel  = {{'BF', 10}};
+            recipe1.functions   = {'takeA3DStack',{zStack(100, 75, 0),'BrightFieldTTL'},''};
+            recipe1.timePoints  = 0:60:60*60*3; % start immediately, call function[1] every 10 sec for 60 sec total
+            recipe1.exposure    = 200;
+
+            recipe2 = recipe();
+            recipe2.setChannel  = {{'GFP', 10}};
+            recipe2.functions   = {'takeA3DStack',{zStack(100, 75, 0),'GFP'},''};
+            recipe2.timePoints  = 0:60:60*60*3; % start immediately, call function[1] every 10 sec for 60 sec total
+            recipe2.exposure    = 200;
+
+            obj.recipelist = [recipe1, recipe2];
+
+
+            obj.combinedTimePoints = sort(unique([recipe1.timePoints, recipe2.timePoints]));
         end
         
         function expPath = returnPath(obj)

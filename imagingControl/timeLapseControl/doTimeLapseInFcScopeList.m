@@ -11,22 +11,18 @@ global masterFileMaker;
 numFcScope = numel(fcScopeList);
 startDelay = fcScopeList{1}.startDelay;
 uberTimePoints = [];
+
+
 for i = 1:numFcScope
-    parsedAndValues = parseParamsForFunctions(fcScopeList{i});
-    executeOnly = fcScopeList{i}.executeOnly;
-    for j = executeOnly
-        currTimePoints = parsedAndValues.values{j}{3};
-        if ~ischar(currTimePoints)
-            uberTimePoints = [uberTimePoints currTimePoints];
-        end
-    end
+    uberTimePoints = [uberTimePoints fcScopeList{i}.combinedTimePoints];
 end
+
 %setup period
 uberTimePoints = sort(uberTimePoints);
 periods = unique(diff(uberTimePoints));
-timeLength = unique(max(uberTimePoints(:)));
-timeLength(timeLength == Inf) = [];
-if isempty(timeLength)
+timeLength = max(uberTimePoints(:));
+
+if (timeLength == Inf || isempty(timeLength))
     warning('timepoints are not defined in fcScope objs');
     return;
 end
@@ -41,17 +37,16 @@ t = timerfind('Name','timeLapse');
 delete(t);
 % create new timer
 t = timer();
-
-set(t,'Name','timeLapse');
-set(t,'ExecutionMode','fixedRate');
-set(t,'Period',useperiod);
-set(t,'TasksToExecute',Nsamples);
-set(t,'BusyMode','drop');
-set(t,'StartFcn',{@my_callback_fcn, @initForNextInFcScopeList,fcScopeList});
-set(t,'ErrorFcn',{@terminateFunc});
-set(t,'StopFcn',{@stopFunc});
-set(t,'TimerFcn',{@my_callback_fcn, @executeFunctionsInFcScopeList,fcScopeList});
-set(t','StartDelay',startDelay);
+t.Name              = 'timeLapse';
+t.ExecutionMode     = 'fixedRate';
+t.Period            = useperiod;
+t.TasksToExecute    = Nsamples;
+t.BusyMode          = 'drop';
+t.StartFcn          = {@my_callback_fcn, @initForNextInFcScopeList,fcScopeList};
+t.ErrorFcn          = {@terminateFunc};
+t.StopFcn           = {@stopFunc};
+t.TimerFcn          = {@my_callback_fcn, @executeFunctionsInFcScopeList,fcScopeList};
+t.StartDelay        = startDelay;
 try
     fprintf('timer starting with delay(secs): %i, period(secs): %i, timeLength(secs): %i, Nsamples: %i\n',startDelay,useperiod,timeLength,Nsamples);
     start(t);
@@ -61,12 +56,12 @@ end
 end
 
 function my_callback_fcn(obj, event, func, funcArg)
-fprintf('===');
-txt1 = '() executed at ';
-event_time = datestr(event.Data.time);
-msg = [func2str(func) txt1 event_time];
-fprintf('%s==========\n',msg);
-func(funcArg);
+    fprintf('===');
+    txt1 = '() executed at ';
+    event_time = datestr(event.Data.time);
+    msg = [func2str(func) txt1 event_time];
+    fprintf('%s==========\n',msg);
+    func(funcArg);
 end
 
 function terminateFunc(obj,event)
