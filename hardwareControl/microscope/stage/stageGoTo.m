@@ -4,8 +4,7 @@ function [] = stageGoTo(stagePos)
 global stageCoordinates;
 if stagePos > 0 && stagePos <= numel(stageCoordinates)
 gotoFcScope = stageCoordinates{stagePos};
-parsedAndValues = parseParamsForFunctions(gotoFcScope);
-gotoStagePos(parsedAndValues.stagePos);
+gotoStagePos(gotoFcScope.stagePos);
 else
    disp('stage position is out of bounds'); 
 end
