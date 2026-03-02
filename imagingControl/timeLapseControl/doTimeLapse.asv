@@ -11,7 +11,8 @@ if isempty(varargin)
         doTimeLapseInFcScope(fcScope);
     else
         disp(['taking fcScope Z stacks at ' num2str(numel(stageCoordinates.stagePos)) ' XYZ locations']);
-        stageCoordinates.updateFcScope(fcScope);
+        global stageCoordinates
+stageCoordinates.updateFrom(newObj);
         doTimeLapseInFcScope(stageCoordinates);
     end
 else
