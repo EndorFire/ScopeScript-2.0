@@ -38,7 +38,7 @@ masterFileMaker.setupTimeLapseFolder(fcScope);
 t = timerfind('Name','timeLapse');
 delete(t);
 % create new timer
-%t = timer();
+t = timer();
 
 set(t,'Name','timeLapse');
 set(t,'ExecutionMode','fixedRate');
