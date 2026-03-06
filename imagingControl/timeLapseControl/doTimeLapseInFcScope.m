@@ -31,7 +31,6 @@ t = timerfind('Name','timeLapse');
 delete(t);
 % create new timer
 t = timer();
-<<<<<<< HEAD:imagingControl/timeLapseControl/doTimeLapseInFcScopeList.m
 t.Name              = 'timeLapse';
 t.ExecutionMode     = 'fixedRate';
 t.Period            = useperiod;
@@ -42,18 +41,6 @@ t.ErrorFcn          = {@terminateFunc};
 t.StopFcn           = {@stopFunc};
 t.TimerFcn          = {@my_callback_fcn, @executeFunctionsInFcScopeList,fcScopeList};
 t.StartDelay        = startDelay;
-=======
-
-set(t,'Name','timeLapse');
-set(t,'ExecutionMode','fixedRate');
-set(t,'Period',useperiod);
-set(t,'TasksToExecute',Nsamples);
-set(t,'BusyMode','drop');
-set(t,'ErrorFcn',{@terminateFunc});
-set(t,'StopFcn',{@stopFunc});
-set(t,'TimerFcn',{@my_callback_fcn, @executeFunctionsInFcScope,fcScope});
-set(t','StartDelay',startDelay);
->>>>>>> upstream:imagingControl/timeLapseControl/doTimeLapseInFcScope.m
 try
     fprintf('timer starting with delay(secs): %i, period(secs): %i, timeLength(secs): %i, Nsamples: %i\n',startDelay,useperiod,timeLength,Nsamples);
     start(t);
