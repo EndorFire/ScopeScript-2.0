@@ -49,7 +49,42 @@ classdef scopeParams < matlab.mixin.SetGet & handle
         %-zStack recipes---------------------------------------------------
         % z step is defined in DAC units, not nanometers
         % 1 DAC unit = 220 um[max stage range]/65536 ~= 3 nm
+
+        zStack1_N   = 100; % number of slices
+        zStack1_dz  = 75; % size of a piezo step; stage goes up
+        zStack1_z0  = 0;  % starting plane
         
+        zStack2_N   = 100;
+        zStack2_dz  = -75; % stage goes down
+        zStack2_z0  = 100*75;
+        
+        zStack3_N   = 15;
+        zStack3_dz  = -300;
+        zStack3_z0  = 4*300;
+        
+        zStack4_N   = 1;
+        zStack4_dz  = 0;
+        zStack4_z0  = 0;
+        
+        zStack5_N   = 11;
+        zStack5_dz  = 400;
+        zStack5_z0  = 0;
+        
+        zStack6_N   = 11;
+        zStack6_dz  = -400;
+        zStack6_z0  = 8*400;
+        
+        zStack8_N   = 180; 
+        zStack8_dz  = -7;
+        zStack8_z0  = 0;
+        
+        zStackZeroStep_N   = 50; %for 2D timeLapses
+        zStackZeroStep_dz  = 0;
+        zStackZeroStep_z0  = 0;
+        
+        zStackZeroStep1_N   = 1; %for 2D timeLapses
+        zStackZeroStep1_dz  = 0;
+        zStackZeroStep1_z0  = 0;
         %-zStack feed forward recipes--------------------------------------
         % these parameters define additional stage acceleration
         % acceleration obtained by sending triangle pulses defined by additional voltage ff1_deltaUp and ff1_deltaDown
@@ -180,13 +215,13 @@ classdef scopeParams < matlab.mixin.SetGet & handle
 
             recipe1 = recipe();
             recipe1.setChannel  = {{'BF', 10}};
-            recipe1.functions   = {'takeA3DStack',{zStack(100, 75, 0),'BrightFieldTTL'},''};
+            recipe1.functions   = {'takeA3DStack',{'zStack2','BrightFieldTTL'},''};
             recipe1.timePoints  = 0:60:60*60*3; % start immediately, call function[1] every 10 sec for 60 sec total
             recipe1.exposure    = 200;
 
             recipe2 = recipe();
             recipe2.setChannel  = {{'GFP', 10}};
-            recipe2.functions   = {'takeA3DStack',{zStack(100, 75, 0),'GFP'},''};
+            recipe2.functions   = {'takeA3DStack',{'zStack2','BrightFieldTTL'},''};
             recipe2.timePoints  = 0:60:60*60*3; % start immediately, call function[1] every 10 sec for 60 sec total
             recipe2.exposure    = 200;
 
